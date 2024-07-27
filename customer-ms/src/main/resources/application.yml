@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: customer-ms
+
+  cloud:
+    config:
+      enabled: false
+
+server:
+  port: 8600
+
+sidecar:
+  port:3000   -- the node application port for (customer)
+
+eureka:
+  client:
+    fetch-registry: false
+    register-with-eureka: false
+
