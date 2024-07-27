@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: customer-file-storage
+
+server:
+  port: 7000
+
+
