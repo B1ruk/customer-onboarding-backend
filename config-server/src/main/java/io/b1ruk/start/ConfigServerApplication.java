@@ -1,4 +1,4 @@
-package et.com.act;
+package io.b1ruk.start;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
