@@ -1,16 +1,12 @@
 package io.b1ruk.start.service.aws;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.sqs.model.SendMessageRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Service
 @Slf4j
