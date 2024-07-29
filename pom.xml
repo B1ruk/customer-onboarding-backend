@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.2</version>
+        <version>3.1.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.b1ruk.start</groupId>
@@ -19,6 +19,7 @@
         <module>config-server</module>
         <module>customer-file-storage</module>
         <module>customer-ms</module>
+        <module>eureka-server</module>
     </modules>
     <packaging>pom</packaging>
     <url/>
