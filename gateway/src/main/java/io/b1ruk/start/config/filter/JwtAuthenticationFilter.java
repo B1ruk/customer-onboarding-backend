@@ -1,13 +1,15 @@
 package io.b1ruk.start.config.filter;
 
 
-import io.b1ruk.start.config.CustomUserDetailsService;
+import io.b1ruk.start.config.JwtAuthenticationToken;
 import io.b1ruk.start.config.JwtConfig;
+import io.b1ruk.start.model.entity.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -15,7 +17,8 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class JwtAuthenticationFilter implements WebFilter {
@@ -23,31 +26,37 @@ public class JwtAuthenticationFilter implements WebFilter {
     @Autowired
     private JwtConfig jwtConfig;
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        ServerHttpRequest request = exchange.getRequest();
-        List<String> authorization = request.getHeaders().get("authorization");
+        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String authToken = authHeader.substring(7);
+            String username = jwtConfig.extractUsername(authToken);
 
-        if (Objects.nonNull(authorization) && !authorization.isEmpty()) {
-            var jwt = authorization.get(0).substring(7);
-            var username = jwtConfig.extractUsername(jwt);
+            if (username != null && jwtConfig.validateToken(authToken, username)) {
+                var roles=jwtConfig.extractAllClaims(authToken).get("roles");
 
-            if (Objects.nonNull(username)) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserEntity user = new UserEntity(username, "", (String) roles); // Adjust roles/authorities as needed
 
-                if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                    if (jwtConfig.validateToken(jwt, userDetails.getUsername())) {
-                        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                    }
-                }
+                JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(user, authToken, toGrantedAuthority(user));
+
+                // Build the SecurityContext with the authenticated token
+                SecurityContext securityContext = new SecurityContextImpl(authenticationToken);
+
+
+                return chain.filter(exchange)
+                        .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
             }
         }
-
         return chain.filter(exchange);
     }
+
+    private List<SimpleGrantedAuthority> toGrantedAuthority(UserEntity userEntity) {
+        return Stream.of(userEntity.getRoles())
+                .map("role_"::concat)
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
 }
