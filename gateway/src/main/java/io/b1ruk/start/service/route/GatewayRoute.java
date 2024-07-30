@@ -11,7 +11,10 @@ public class GatewayRoute {
     @Bean
     public RouteLocator customLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("route_to_customer_ms", r -> r.path("/onboarding/**").uri("lb://customer-ms"))
+//                .route("route_to_customer_ms", r -> r.path("/onboarding/**").uri("lb://customer-ms"))
+                .route("route_to_customer_ms", r -> r.path("/onboarding/**")
+                        .filters(f -> f.rewritePath("/onboarding/(?<remaining>.*)", "/${remaining}"))
+                        .uri("http://localhost:3000"))
                 .build();
     }
 }

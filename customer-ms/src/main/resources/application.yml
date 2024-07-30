@@ -1,19 +1,21 @@
 spring:
+  cloud:
+    sidecar:
+      port: 3000
+      health-uri: /health
+      accept-all-ssl-certificates: true
   application:
     name: customer-ms
 
-  cloud:
-    config:
-      enabled: false
+  config:
+    import: configserver:http://localhost:8888
 
 server:
   port: 8600
 
 sidecar:
-  port:3000   -- the node application port for (customer)
+  port: 3000
+  health-uri: http://localhost:3000/health
 
-eureka:
-  client:
-    fetch-registry: false
-    register-with-eureka: false
+
 
