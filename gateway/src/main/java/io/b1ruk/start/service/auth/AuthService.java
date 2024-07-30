@@ -3,6 +3,7 @@ package io.b1ruk.start.service.auth;
 import io.b1ruk.start.config.JwtConfig;
 import io.b1ruk.start.model.entity.UserEntity;
 import io.b1ruk.start.model.repository.UserRepository;
+import io.b1ruk.start.rest.restData.AuthResponse;
 import jakarta.ws.rs.ForbiddenException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,14 +21,15 @@ public class AuthService {
         this.jwtConfig = jwtConfig;
     }
 
-    public String authenticate(String username, String password) throws Exception {
+    public AuthResponse authenticate(String username, String password) throws Exception {
         UserEntity user = userRepository.findByUsername(username);
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new ForbiddenException("Invalid password");
         }
 
-        return jwtConfig.generateToken(user);
+        var token=jwtConfig.generateToken(user);
+        return new AuthResponse(token,user.getRoles());
     }
 }
 
