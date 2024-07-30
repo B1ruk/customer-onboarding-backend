@@ -1,4 +1,4 @@
-package io.b1ruk.start.service;
+package io.b1ruk.start.service.auth;
 
 import io.b1ruk.start.config.JwtConfig;
 import io.b1ruk.start.model.entity.UserEntity;
