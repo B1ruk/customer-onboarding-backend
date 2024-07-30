@@ -1,5 +1,6 @@
 package io.b1ruk.start.config;
 
+import io.b1ruk.start.model.entity.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -42,10 +43,10 @@ public class JwtConfig {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String username, Set<String> roles) {
+    public String generateToken(UserEntity userEntity) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", roles);
-        return createToken(claims, username);
+        claims.put("roles", userEntity.getRoles());
+        return createToken(claims, userEntity.getUsername());
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
